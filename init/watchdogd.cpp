@@ -24,6 +24,7 @@
 #include <android-base/logging.h>
 
 #include "log.h"
+#include <cutils/properties.h>
 
 #ifdef _INIT_INIT_H
 #error "Do not include init.h in files used by ueventd or watchdogd; it will expose init's globals"
@@ -40,6 +41,14 @@ int watchdogd_main(int argc, char **argv) {
     int margin = 10;
     if (argc >= 3) margin = atoi(argv[2]);
 
+    char prop[PROP_VALUE_MAX];
+    property_get("ro.boot.watchdogd", prop, "0");
+    if (!(strcmp(prop, "disabled"))){
+        LOG(INFO) << "watchdogd disabled !\n";
+        while (true) {
+            sleep(interval);
+        }
+    }
     LOG(INFO) << "watchdogd started (interval " << interval << ", margin " << margin << ")!";
 
     int fd = open(DEV_NAME, O_RDWR|O_CLOEXEC);
