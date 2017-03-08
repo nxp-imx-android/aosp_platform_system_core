@@ -18,12 +18,30 @@
  ****************************************************************************/
 #ifndef _LINUX_MXC_ION_H
 #define _LINUX_MXC_ION_H
-#include <linux/ion.h>
+#include <linux/ioctl.h>
+#include <linux/types.h>
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#define ION_CMA_HEAP_ID 0
 struct ion_phys_data {
+  ion_user_handle_t handle;
+  unsigned long phys;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- ion_user_handle_t handle;
- unsigned long phys;
 };
-#define ION_IOC_PHYS _IOWR(ION_IOC_MAGIC, 7, struct ion_phys_data)
+struct ion_phys_dma_data {
+  unsigned long phys;
+  size_t size;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  int dmafd;
+};
+struct ion_phys_virt_data {
+  unsigned long virt;
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  unsigned long phys;
+  size_t size;
+};
+#define ION_IOC_PHYS _IOWR(ION_IOC_MAGIC, 8, struct ion_phys_data)
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#define ION_IOC_PHYS_DMA _IOWR(ION_IOC_MAGIC, 9, struct ion_phys_dma_data)
+#define ION_IOC_PHYS_VIRT _IOWR(ION_IOC_MAGIC, 10, struct ion_phys_virt_data)
 #endif
+
