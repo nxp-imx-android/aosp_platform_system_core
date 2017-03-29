@@ -30,8 +30,8 @@
 #include <sys/types.h>
 
 #include <linux/ion.h>
-#include <linux/mxc_ion.h>
 #include <ion/ion.h>
+#include <ion/mxc_ion.h>
 
 int ion_open()
 {
