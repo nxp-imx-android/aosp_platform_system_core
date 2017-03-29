@@ -4,7 +4,6 @@
  * Memory Allocator functions for ion
  *
  *   Copyright 2011 Google, Inc
- *   Copyright (C) 2012-2016 Freescale Semiconductor, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -31,7 +30,6 @@
 
 #include <linux/ion.h>
 #include <ion/ion.h>
-#include <ion/mxc_ion.h>
 
 int ion_open()
 {
@@ -120,32 +118,6 @@ int ion_map(int fd, ion_user_handle_t handle, size_t length, int prot,
     return ret;
 }
 
-static int ion_custom(int fd, void *arg)
-{
-	int ret;
-	ret = ion_ioctl(fd, ION_IOC_CUSTOM, arg);
-	return ret;
-}
-
-unsigned long ion_phys(int fd, ion_user_handle_t handle)
-{
-        int ret;
-        struct ion_phys_data data = {
-                .handle = handle,
-		.phys = 0,
-        };
-
-	struct ion_custom_data custom = {
-		.cmd = ION_IOC_PHYS,
-		.arg = (uintptr_t)&data,
-	};
-
-        ret = ion_custom(fd, &custom);
-        if (ret == 0)
-            return data.phys;
-
-        return 0;
-}
 int ion_share(int fd, ion_user_handle_t handle, int *share_fd)
 {
     int ret;
