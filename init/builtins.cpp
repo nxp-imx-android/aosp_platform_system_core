@@ -725,6 +725,11 @@ static int do_powerctl(const std::vector<std::string>& args) {
                 if (!write_reboot_bootloader(&err)) {
                     ERROR("reboot-bootloader: Error writing bootloader_message: ");
                 }
+            } else if (strncmp(reboot_target, "recovery", strlen("recovery")) == 0) {
+                std::string err;
+                if (!write_reboot_recovery(&err)) {
+                    ERROR("reboot-recovery: Error writing bootloader_message: ");
+                }
             }
         }
     } else if (command[len] != '\0') {
