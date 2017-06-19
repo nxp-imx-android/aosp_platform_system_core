@@ -567,6 +567,13 @@ bool HandlePowerctlMessage(const std::string& command) {
                     return false;
                 }
                 reboot_target = "recovery";
+            } else if (reboot_target == "recovery") {
+                std::string err;
+                if (!write_reboot_recovery(&err)) {
+                    LOG(ERROR) << "reboot-recovery: Error writing "
+                                  "recovery_message: "
+                               << err;
+                }
             }
 
             // If there is an additional parameter, pass it along
