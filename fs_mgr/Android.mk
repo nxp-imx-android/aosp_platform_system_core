@@ -35,4 +35,7 @@ LOCAL_STATIC_LIBRARIES := libfs_mgr \
     libselinux
 LOCAL_CXX_STL := libc++_static
 LOCAL_CFLAGS := -Werror
+ifeq ($(DM_VERITY_RUNTIME_CONFIG),true)
+LOCAL_CFLAGS += -DDM_VERITY_DYNAMIC
+endif
 include $(BUILD_EXECUTABLE)
