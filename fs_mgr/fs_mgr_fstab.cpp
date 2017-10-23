@@ -365,6 +365,21 @@ static int parse_flags(char *flags, struct flag_list *fl,
     return f;
 }
 
+#define STORAGE_TYPE_FILTER "androidboot.storage_type="
+
+static std::string read_boot_type_from_cmdline() {
+    std::string cmdline;
+    std::string storageFilter;
+    android::base::ReadFileToString("/proc/cmdline", &cmdline);
+    const char* storageType = strstr(cmdline.c_str(), STORAGE_TYPE_FILTER);
+    if (!storageType)
+        return storageFilter;
+    const char* p = storageType + strlen(STORAGE_TYPE_FILTER);
+    const char* q = strpbrk(p, " \t\n\r");
+    storageFilter = std::string(p, q);
+    return storageFilter;
+}
+
 static bool is_dt_fstab_compatible() {
     std::string dt_value;
     std::string file_name = kAndroidDtDir + "/fstab/compatible";
@@ -407,9 +422,14 @@ static std::string read_fstab_from_dt() {
 
         file_name = android::base::StringPrintf("%s/%s/dev", fstabdir_name.c_str(), dp->d_name);
         if (!read_dt_file(file_name, &value)) {
-            LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
-            fstab.clear();
-            break;
+            std::string boot_type;
+            boot_type = read_boot_type_from_cmdline();
+            file_name = android::base::StringPrintf("%s/%s/dev_%s", fstabdir_name.c_str(), dp->d_name, boot_type.c_str());
+            if (!read_dt_file(file_name, &value)) {
+                LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
+                fstab.clear();
+                break;
+            }
         }
         fstab_entry.push_back(value);
         fstab_entry.push_back(android::base::StringPrintf("/%s", dp->d_name));
