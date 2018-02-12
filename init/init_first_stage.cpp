@@ -71,6 +71,7 @@ class FirstStageMount {
     std::unique_ptr<fstab, decltype(&fs_mgr_free_fstab)> device_tree_fstab_;
     std::vector<fstab_rec*> mount_fstab_recs_;
     std::set<std::string> required_devices_partition_names_;
+    std::string devices_partition_path;
     DeviceHandler device_handler_;
     UeventListener uevent_listener_;
 };
@@ -387,6 +388,19 @@ bool FirstStageMountVBootV2::GetRequiredDevices() {
             required_devices_partition_names_.emplace(partition + ab_suffix);
         }
     }
+
+    if (!mount_fstab_recs_.empty()) {
+        // suppose all android images are on the same flash.
+        // add devices_partition_path which record the boot up block device node.
+        fstab_rec* fstab_rec = mount_fstab_recs_[0];
+        std::string blk_devices = fstab_rec->blk_device;
+        std::string mount_point = fstab_rec->mount_point;
+        int by_name_pos = blk_devices.find("/by-name");
+        devices_partition_path = blk_devices.substr(blk_devices.rfind("/",
+                       by_name_pos - 1) + 1, by_name_pos - blk_devices.rfind("/",
+                       by_name_pos - 1) -1 );
+    }
+
     return true;
 }
 
@@ -404,22 +418,8 @@ ListenerAction FirstStageMountVBootV2::UeventCallback(const Uevent& uevent) {
         //   - /dev/block/platform/soc.0/f9824900.sdhci/by-name/modem
         //   - /dev/block/platform/soc.0/f9824900.sdhci/by-num/p1
         //   - /dev/block/platform/soc.0/f9824900.sdhci/mmcblk0p1
-	bool valide_uevent = false;
-	for (auto fstab_rec : mount_fstab_recs_) {
-		std::string blk_devices = fstab_rec->blk_device;
-		std::string mount_point = fstab_rec->mount_point;
-		if ( mount_point.substr(1) == uevent.partition_name.substr(0, uevent.partition_name.find("_")) &&
-			blk_devices.substr(blk_devices.rfind("/", blk_devices.find("/by-name") - 1) + 1,
-			blk_devices.find("/by-name") - blk_devices.rfind("/",
-			blk_devices.find("/by-name") - 1) -1 ) ==
-			uevent.path.substr(uevent.path.rfind("/", uevent.path.find("/mmc_host") - 1) + 1,
-			uevent.path.find("/mmc_host") - uevent.path.rfind("/", uevent.path.find("/mmc_host") - 1) -1))
-			valide_uevent = true;
-		else
-			continue;
-	}
-	if (!valide_uevent)
-		return ListenerAction::kContinue;
+        if (uevent.path.find(devices_partition_path) == uevent.path.npos)
+            return ListenerAction::kContinue;
         std::vector<std::string> links = device_handler_.GetBlockDeviceSymlinks(uevent);
         if (!links.empty()) {
             auto[it, inserted] = by_name_symlink_map_.emplace(uevent.partition_name, links[0]);
