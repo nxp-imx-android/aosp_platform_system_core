@@ -794,6 +794,19 @@ static bool call_vdc(const std::vector<std::string>& args) {
     return true;
 }
 
+/* Check Whether this partition is mounted in first mount stage.
+ * Return true when this partition is mounted, otherwise return false.
+ */
+bool fs_mgr_dt_mounted(struct fstab *fstab_dt, char *mount_point)
+{
+    int i = 0;
+    for (i = 0; i < fstab_dt->num_entries; i++) {
+        if (!strcmp(fstab_dt->recs[i].mount_point, mount_point))
+            return true;
+    }
+    return false;
+}
+
 /* When multiple fstab records share the same mount_point, it will
  * try to mount each one in turn, and ignore any duplicates after a
  * first successful mount.
@@ -808,6 +821,7 @@ int fs_mgr_mount_all(struct fstab *fstab, int mount_mode)
     int mount_errno = 0;
     int attempted_idx = -1;
     FsManagerAvbUniquePtr avb_handle(nullptr);
+    struct fstab *fstab_dt = fs_mgr_read_fstab_dt();
 
     if (!fstab) {
         return FS_MGR_MNTALL_FAIL;
@@ -820,6 +834,9 @@ int fs_mgr_mount_all(struct fstab *fstab, int mount_mode)
              ((mount_mode == MOUNT_MODE_EARLY) && fs_mgr_is_latemount(&fstab->recs[i]))) {
             continue;
         }
+
+        if (fs_mgr_dt_mounted(fstab_dt, fstab->recs[i].mount_point))
+            continue;
 
         /* Skip swap and raw partition entries such as boot, recovery, etc */
         if (!strcmp(fstab->recs[i].fs_type, "swap") ||
@@ -1007,6 +1024,7 @@ int fs_mgr_mount_all(struct fstab *fstab, int mount_mode)
         }
     }
 
+    fs_mgr_free_fstab(fstab_dt);
     if (error_count) {
         return FS_MGR_MNTALL_FAIL;
     } else {
