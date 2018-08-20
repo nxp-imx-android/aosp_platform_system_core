@@ -45,7 +45,7 @@ cc_defaults {
                 "-UWORLD_WRITABLE_KMSG",
                 "-DWORLD_WRITABLE_KMSG=1",
                 "-UDUMP_ON_UMOUNT_FAILURE",
-                "-DDUMP_ON_UMOUNT_FAILURE=1",
+                "-DDUMP_ON_UMOUNT_FAILURE=0",
             ],
         },
         eng: {
