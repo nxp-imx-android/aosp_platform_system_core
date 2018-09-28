@@ -137,6 +137,8 @@ void remount_service(int fd, void* cookie) {
                        "Use \"adb disable-verity\" to disable verity.\n"
                        "If you do not, remount may succeed, however, you will still "
                        "not be able to write to these volumes.\n");
+        adb_close(fd);
+        return;
     }
 
     bool success = true;
