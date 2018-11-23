@@ -84,6 +84,9 @@ cc_library_static {
         "fs_mgr_boot_config.cpp",
         "fs_mgr_slotselect.cpp",
     ],
-    export_include_dirs: ["include_fstab"],
+    export_include_dirs: [
+        "include_fstab",
+        "include",
+    ],
     header_libs: ["libbase_headers"],
 }
