@@ -58,6 +58,7 @@ static const std::set<std::string> kExportedActionableProperties = {
     "vold.post_fs_data_done",
     "vts.native_server.on",
     "wlan.driver.status",
+    "ro.hardware.gatekeeper",
 };
 
 }  // namespace init
