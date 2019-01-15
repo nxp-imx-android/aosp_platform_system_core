@@ -24,6 +24,10 @@ ifeq ($(TARGET_USER_MODE_LINUX), true)
     init_cflags += -DUSER_MODE_LINUX
 endif
 
+ifeq ($(PRODUCT_IMX_CAR),true)
+    init_cflags += -DIMX_CAR
+endif
+
 init_cflags += \
     $(init_options) \
     -Wall -Wextra \

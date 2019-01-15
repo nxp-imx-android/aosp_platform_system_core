@@ -1119,6 +1119,9 @@ int main(int argc, char** argv) {
     }
 
     signal_handler_init();
+#ifdef IMX_CAR
+    property_set("ro.zygote", "zygote_auto");
+#endif
 
     property_load_boot_defaults();
     export_oem_lock_status();
