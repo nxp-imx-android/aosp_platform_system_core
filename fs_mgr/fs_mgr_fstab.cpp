@@ -454,11 +454,10 @@ static std::string read_fstab_from_dt() {
             }
         }
 
-        file_name = android::base::StringPrintf("%s/%s/dev", fstabdir_name.c_str(), dp->d_name);
+        std::string boot_type = read_boot_type_from_cmdline();
+        file_name = android::base::StringPrintf("%s/%s/dev_%s", fstabdir_name.c_str(), dp->d_name, boot_type.c_str());
         if (!read_dt_file(file_name, &value)) {
-            std::string boot_type;
-            boot_type = read_boot_type_from_cmdline();
-            file_name = android::base::StringPrintf("%s/%s/dev_%s", fstabdir_name.c_str(), dp->d_name, boot_type.c_str());
+            file_name = android::base::StringPrintf("%s/%s/dev", fstabdir_name.c_str(), dp->d_name);
             if (!read_dt_file(file_name, &value)) {
                 LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
                 return {};
