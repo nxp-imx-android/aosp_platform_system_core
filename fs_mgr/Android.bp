@@ -105,7 +105,7 @@ cc_library_static {
             enabled: false,
         },
     },
-    export_include_dirs: ["include_fstab"],
+    export_include_dirs: ["include_fstab", "include",],
     header_libs: [
         "libbase_headers",
         "libgsi_headers",
