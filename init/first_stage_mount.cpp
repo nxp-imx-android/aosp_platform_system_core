@@ -106,6 +106,7 @@ class FirstStageMount {
     std::string super_partition_name_;
     std::unique_ptr<DeviceHandler> device_handler_;
     UeventListener uevent_listener_;
+    std::string boot_device;
 };
 
 class FirstStageMountVBootV1 : public FirstStageMount {
@@ -219,6 +220,7 @@ static bool IsStandaloneImageRollback(const AvbHandle& builtin_vbmeta,
 FirstStageMount::FirstStageMount(Fstab fstab)
     : need_dm_verity_(false), fstab_(std::move(fstab)), uevent_listener_(16 * 1024 * 1024) {
     auto boot_devices = android::fs_mgr::GetBootDevices();
+    boot_device = *(boot_devices.begin());
     device_handler_ = std::make_unique<DeviceHandler>(
             std::vector<Permissions>{}, std::vector<SysfsPermissions>{}, std::vector<Subsystem>{},
             std::move(boot_devices), false);
@@ -383,6 +385,9 @@ ListenerAction FirstStageMount::HandleBlockDevice(const std::string& name, const
     // Matches partition name to create device nodes.
     // Both required_devices_partition_names_ and uevent->partition_name have A/B
     // suffix when A/B is used.
+    if (uevent.path.find(boot_device) == uevent.path.npos)
+           return ListenerAction::kContinue;
+
     auto iter = required_devices_partition_names_.find(name);
     if (iter != required_devices_partition_names_.end()) {
         LOG(VERBOSE) << __PRETTY_FUNCTION__ << ": found partition: " << *iter;
