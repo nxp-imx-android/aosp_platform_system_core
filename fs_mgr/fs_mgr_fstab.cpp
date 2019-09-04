@@ -345,6 +345,21 @@ std::string InitAndroidDtDir() {
     return android_dt_dir;
 }
 
+#define BOOT_DEVICE_ROOT_FILTER "androidboot.boot_device_root="
+
+static std::string read_boot_device_root_from_cmdline() {
+    std::string cmdline;
+    std::string bootDeviceRootFilter;
+    android::base::ReadFileToString("/proc/cmdline", &cmdline);
+    const char* bootDeviceRoot = strstr(cmdline.c_str(), BOOT_DEVICE_ROOT_FILTER);
+    if (!bootDeviceRoot)
+        return bootDeviceRootFilter;
+    const char* p = bootDeviceRoot + strlen(BOOT_DEVICE_ROOT_FILTER);
+    const char* q = strpbrk(p, " \t\n\r");
+    bootDeviceRootFilter = std::string(p, q);
+    return bootDeviceRootFilter;
+}
+
 bool IsDtFstabCompatible() {
     std::string dt_value;
     std::string file_name = get_android_dt_dir() + "/fstab/compatible";
@@ -389,10 +404,14 @@ std::string ReadFstabFromDt() {
             }
         }
 
-        file_name = android::base::StringPrintf("%s/%s/dev", fstabdir_name.c_str(), dp->d_name);
+        std::string boot_device_root = read_boot_device_root_from_cmdline();
+        file_name = android::base::StringPrintf("%s/%s/dev_%s", fstabdir_name.c_str(), dp->d_name, boot_device_root.c_str());
         if (!ReadDtFile(file_name, &value)) {
-            LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
-            return {};
+            file_name = android::base::StringPrintf("%s/%s/dev", fstabdir_name.c_str(), dp->d_name);
+            if (!ReadDtFile(file_name, &value)) {
+                LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
+                return {};
+            }
         }
         fstab_entry.push_back(value);
 
