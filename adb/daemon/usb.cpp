@@ -327,6 +327,9 @@ struct UsbFfsConnection : public Connection {
                 LOG(INFO) << "USB event: "
                           << to_string(static_cast<usb_functionfs_event_type>(event.type));
 
+                std::string usb_controller = android::base::GetProperty("vendor.usb.config", "");
+                std::string path = android::base::StringPrintf("/sys/class/udc/%s", usb_controller.c_str());
+
                 switch (event.type) {
                     case FUNCTIONFS_BIND:
                         if (bound) {
@@ -383,8 +386,11 @@ struct UsbFfsConnection : public Connection {
                             LOG(WARNING) << "received FUNCTIONFS_UNBIND when not bound?";
                         }
 
-                        bound = false;
-                        running = false;
+                        sleep(3);
+                        if (access(path.c_str(), F_OK) == 0) {
+                            bound = false;
+                            running = false;
+                        }
                         break;
 
                     case FUNCTIONFS_SETUP: {
