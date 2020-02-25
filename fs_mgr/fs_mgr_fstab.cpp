@@ -880,7 +880,13 @@ std::vector<FstabEntry*> GetEntriesForMountPoint(Fstab* fstab, const std::string
 
 std::set<std::string> GetBootDevices() {
     // First check bootconfig, then kernel commandline, then the device tree
-    std::string dt_file_name = get_android_dt_dir() + "/boot_devices";
+    std::string bootDeviceRoot;
+    std::string dt_file_name;
+    if (fs_mgr_get_boot_config("boot_device_root", &bootDeviceRoot))
+        dt_file_name = get_android_dt_dir() + "/boot_devices_" + bootDeviceRoot;
+    else
+        dt_file_name = get_android_dt_dir() + "/boot_devices";
+
     std::string value;
     if (fs_mgr_get_boot_config_from_bootconfig_source("boot_devices", &value) ||
         fs_mgr_get_boot_config_from_bootconfig_source("boot_device", &value)) {
