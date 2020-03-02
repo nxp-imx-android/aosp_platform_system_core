@@ -28,6 +28,28 @@ cc_library {
 }
 
 cc_binary {
+    name: "simglen",
+    host_supported: true,
+    srcs: [
+        "simglen.cpp",
+        "sparse_crc32.cpp",
+    ],
+    stl: "libc++_static",
+    static_libs: [
+        "libsparse",
+        "libz",
+        "libbase",
+    ],
+    target: {
+            windows: {
+                enabled: true,
+         },
+    },
+
+    cflags: ["-Werror"],
+}
+
+cc_binary {
     name: "simg2img",
     host_supported: true,
     srcs: [
@@ -39,6 +61,11 @@ cc_binary {
         "libz",
         "libbase",
     ],
+    target: {
+            windows: {
+                enabled: true,
+         },
+    },
 
     cflags: ["-Werror"],
 }
