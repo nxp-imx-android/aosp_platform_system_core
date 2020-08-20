@@ -83,7 +83,7 @@ ListenerAction BlockDevInitializer::HandleUevent(const Uevent& uevent,
         return ListenerAction::kContinue;
     }
 
-    if (!android::base::StartsWith(uevent.path, "/devices/virtual")) {
+    if (uevent.path.find("mmc") != uevent.path.npos) {
         decltype (boot_devices_.begin()) boot_device_it;
         for(boot_device_it = boot_devices_.begin(); boot_device_it != boot_devices_.end(); boot_device_it++) {
             if (uevent.path.find(*boot_device_it) != uevent.path.npos) {
