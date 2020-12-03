@@ -131,6 +131,11 @@ void TrustyKeymaster::ImportWrappedKey(const ImportWrappedKeyRequest& request,
     ForwardCommand(KM_IMPORT_WRAPPED_KEY, request, response);
 }
 
+void TrustyKeymaster::DestroyAttestationIds(const DestroyAttestationIdsRequest& request,
+                                       DestroyAttestationIdsResponse* response) {
+    ForwardCommand(KM_DESTROY_ATTESTATION_IDS, request, response);
+}
+
 void TrustyKeymaster::ExportKey(const ExportKeyRequest& request, ExportKeyResponse* response) {
     ForwardCommand(KM_EXPORT_KEY, request, response);
 }
