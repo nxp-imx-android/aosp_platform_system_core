@@ -509,7 +509,11 @@ Return<ErrorCode> TrustyKeymaster4Device::deleteAllKeys() {
 }
 
 Return<ErrorCode> TrustyKeymaster4Device::destroyAttestationIds() {
-    return ErrorCode::UNIMPLEMENTED;
+    DestroyAttestationIdsRequest request(impl_->message_version());
+    DestroyAttestationIdsResponse response(impl_->message_version());
+    impl_->DestroyAttestationIds(request, &response);
+
+    return legacy_enum_conversion(response.error);
 }
 
 Return<void> TrustyKeymaster4Device::begin(KeyPurpose purpose, const hidl_vec<uint8_t>& key,
