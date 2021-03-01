@@ -29,6 +29,7 @@
 using std::string;
 
 #include <trusty_keymaster/ipc/trusty_keymaster_ipc.h>
+#include <android-base/properties.h>
 
 static const char* _sopts = "h";
 static const struct option _lopts[] = {
@@ -114,6 +115,24 @@ struct ClearAttestationCertChainRequest : public keymaster::KeymasterMessage {
 };
 
 struct ClearAttestationCertChainResponse : public KeymasterNoResponse {};
+
+struct AppendAttestationIdRequest : public keymaster::KeymasterMessage {
+    explicit AppendAttestationIdRequest(int32_t ver = keymaster::MAX_MESSAGE_VERSION)
+        : KeymasterMessage(ver) {}
+    size_t SerializedSize() const override {
+        return id_data.SerializedSize();
+    }
+    uint8_t* Serialize(uint8_t* buf, const uint8_t* end) const override {
+        return id_data.Serialize(buf, end);
+    }
+    bool Deserialize(const uint8_t** buf_ptr, const uint8_t* end) override {
+        return id_data.Deserialize(buf_ptr, end);
+    }
+
+    keymaster::Buffer id_data;
+};
+
+struct AppendAttestationIdResponse : public KeymasterNoResponse{};
 
 static int set_attestation_key_or_cert_bin(uint32_t cmd, keymaster_algorithm_t algorithm,
                                            const void* key_data, size_t key_data_size) {
@@ -262,6 +281,46 @@ static int clear_cert_chain(const xmlChar* algorithm_str) {
     return 0;
 }
 
+static int set_device_identifier(const xmlChar* id, const xmlChar* value) {
+    int ret;
+    AppendAttestationIdRequest req;
+    AppendAttestationIdResponse rsp;
+
+    if (xmlStrEqual(id, BAD_CAST "Serial") && xmlStrEqual(value, BAD_CAST "auto")) {
+        string serialno = android::base::GetProperty("ro.boot.serialno", "");
+        if (serialno.length()) {
+            req.id_data.Reinitialize(serialno.data(), serialno.length());
+            printf("Auto set the serial number: %s!\n", serialno.data());
+	} else {
+            printf("Reading serial number failed!\n");
+            return -1;
+	}
+    } else {
+        req.id_data.Reinitialize(value, strlen((const char *)value));
+    }
+
+    ret = trusty_keymaster_send(KM_APPEND_ATTESTATION_ID, req, &rsp);
+    if (ret) {
+        fprintf(stderr, "trusty_keymaster_send cmd 0x%x failed %d\n", KM_APPEND_ATTESTATION_ID, ret);
+        return ret;
+    }
+
+    return 0;
+}
+
+static int clear_device_identifier() {
+    int ret;
+    keymaster::DestroyAttestationIdsRequest req;
+    keymaster::DestroyAttestationIdsResponse rsp;
+
+    ret = trusty_keymaster_send(KM_DESTROY_ATTESTATION_IDS, req, &rsp);
+    if (ret) {
+        fprintf(stderr, "%s: trusty_keymaster_send failed %d\n", __func__, ret);
+        return ret;
+    }
+    return 0;
+}
+
 static int process_xml(xmlTextReaderPtr xml) {
     int ret;
     const xmlChar* algorithm = NULL;
@@ -286,7 +345,24 @@ static int process_xml(xmlTextReaderPtr xml) {
                         return ret;
                     }
                     printf("%s, algorithm %s: Clear cert chain cmd done\n", element, algorithm);
-                }
+                } else if (xmlStrEqual(name, BAD_CAST "DeviceIdentifier")) {
+                    ret = clear_device_identifier();
+                    if (ret) {
+                        fprintf(stderr, "Clear device identifier failed!\n");
+                        return ret;
+                    }
+                    printf("Clear device identifier done!\n");
+		} else if (xmlStrEqual(name, BAD_CAST "Brand") || xmlStrEqual(name, BAD_CAST "Device") || \
+                           xmlStrEqual(name, BAD_CAST "Manufacture") || xmlStrEqual(name, BAD_CAST "Model") || \
+                           xmlStrEqual(name, BAD_CAST "Product") || xmlStrEqual(name, BAD_CAST "Serial")) {
+                    const xmlChar* value = xmlTextReaderGetAttribute(xml, BAD_CAST "value");
+                    ret = set_device_identifier(element, value);
+                    if (ret) {
+                        fprintf(stderr, "Set device identifier failed!\n");
+                        return ret;
+                    }
+                    printf("ID %s is provisioned with value: %s\n", element, value);
+		}
                 break;
             case XML_READER_TYPE_TEXT:
                 value = xmlTextReaderConstValue(xml);

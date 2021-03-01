@@ -113,4 +113,20 @@ C/NR2TB8fVvaNTQdqEcbY6WFZTytTySn502vQX3xvw==
       </CertificateChain>
     </Key>
   </Keybox>
+  <Keybox DeviceID="dev1">
+    <DeviceIdentifier>
+      <Brand value="Android">
+      </Brand>
+      <Device value="evk_8mp">
+      </Device>
+      <Product value="EVK_8MP">
+      </Product>
+      <Manufacture value="nxp">
+      </Manufacture>
+      <Model value="EVK_8MP">
+      </Model>
+      <Serial value="auto">
+      </Serial>
+    </DeviceIdentifier>
+  </Keybox>
 </AndroidAttestation>
