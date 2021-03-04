@@ -19,3 +19,9 @@ cc_library_static {
     vendor: true,
     export_include_dirs: ["include"],
 }
+
+cc_library_static {
+    name: "libtrustystorageinterface_recovery",
+    recovery: true,
+    export_include_dirs: ["include"],
+}

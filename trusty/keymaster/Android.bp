@@ -163,11 +163,43 @@ cc_binary {
         "libtrusty",
         "libhardware",
         "libkeymaster_messages",
+    ],
+    static_libs: [
         "libxml2",
     ],
     cflags: [
         "-Wall",
         "-Werror",
+	"-DSTATIC_LIBXML=1",
     ],
 }
 
+cc_binary {
+    name: "trusty_keymaster_set_attestation_key_recovery",
+    recovery: true,
+
+    srcs: [
+        "set_attestation_key/set_attestation_key.cpp",
+        "ipc/trusty_keymaster_ipc.cpp",
+    ],
+
+    local_include_dirs: ["include"],
+
+    shared_libs: [
+        "libc",
+        "libbase",
+        "libcrypto",
+        "liblog",
+        "libtrusty",
+        "libhardware",
+        "libkeymaster_messages",
+    ],
+    static_libs: [
+        "libxml2",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+	"-DSTATIC_LIBXML=1",
+    ],
+}

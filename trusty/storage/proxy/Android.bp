@@ -38,3 +38,28 @@ cc_binary {
         "-Werror",
     ],
 }
+
+cc_binary {
+    name: "storageproxyd_recovery",
+    recovery: true,
+
+    srcs: [
+        "ipc.c",
+        "rpmb.c",
+        "storage.c",
+        "proxy.c",
+    ],
+
+    shared_libs: ["liblog"],
+    header_libs: ["libcutils_headers"],
+
+    static_libs: [
+        "libtrustystorageinterface_recovery",
+        "libtrusty",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+}
