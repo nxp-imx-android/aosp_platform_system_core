@@ -17,7 +17,7 @@
 #include "TrustyApp.h"
 #include "TrustyIpc.h"
 
-#include <BufferAllocator/BufferAllocator.h>
+#include "IonAllocator.h"
 #include <android-base/logging.h>
 #include <sys/mman.h>
 #include <sys/uio.h>
@@ -100,8 +100,8 @@ TrustyApp::TrustyApp(const std::string& path, const std::string& appname)
     }
 
     uint32_t shm_len = RoundPageUp(CONFIRMATIONUI_MAX_MSG_SIZE);
-    BufferAllocator allocator;
-    unique_fd dma_buf(allocator.Alloc("system", shm_len));
+    fsl::IonAllocator * pIonAllocator = fsl::IonAllocator::getInstance();
+    unique_fd dma_buf = unique_fd(pIonAllocator->allocMemory(shm_len, ION_MEM_ALIGN, fsl::MFLAGS_CONTIGUOUS));
     if (dma_buf < 0) {
         LOG(ERROR) << AT << "failed to allocate shared memory buffer";
         return;
