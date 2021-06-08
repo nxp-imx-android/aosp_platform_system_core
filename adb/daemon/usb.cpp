@@ -299,19 +299,12 @@ struct UsbFfsConnection : public Connection {
                 // If we don't see our first bind within a second, try again.
                 int timeout_ms = bound ? -1 : 1000;
 
-                std::string usb_controller = android::base::GetProperty("vendor.usb.config", "");
-                std::string path = android::base::StringPrintf("/sys/class/udc/%s", usb_controller.c_str());
-
                 int rc = TEMP_FAILURE_RETRY(adb_poll(pfd, 2, timeout_ms));
                 if (rc == -1) {
                     PLOG(FATAL) << "poll on USB control fd failed";
                 } else if (rc == 0) {
                     LOG(WARNING) << "timed out while waiting for FUNCTIONFS_BIND, trying again";
-                    if (access(path.c_str(), F_OK) == 0) {
-                        break;
-                    } else {
-                        continue;
-                    }
+                    break;
                 }
 
                 if (pfd[1].revents) {
@@ -333,6 +326,9 @@ struct UsbFfsConnection : public Connection {
 
                 LOG(INFO) << "USB event: "
                           << to_string(static_cast<usb_functionfs_event_type>(event.type));
+
+                std::string usb_controller = android::base::GetProperty("vendor.usb.config", "");
+                std::string path = android::base::StringPrintf("/sys/class/udc/%s", usb_controller.c_str());
 
                 switch (event.type) {
                     case FUNCTIONFS_BIND:
