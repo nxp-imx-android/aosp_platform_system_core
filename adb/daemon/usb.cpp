@@ -386,11 +386,8 @@ struct UsbFfsConnection : public Connection {
                             LOG(WARNING) << "received FUNCTIONFS_UNBIND when not bound?";
                         }
 
-                        sleep(3);
-                        if (access(path.c_str(), F_OK) == 0) {
-                            bound = false;
-                            running = false;
-                        }
+                        bound = false;
+                        running = false;
                         break;
 
                     case FUNCTIONFS_SETUP: {
