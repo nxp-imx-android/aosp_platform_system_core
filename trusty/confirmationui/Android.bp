@@ -50,33 +50,37 @@ cc_binary {
 cc_library {
     name: "android.hardware.confirmationui@1.0-lib.trusty",
     vendor: true,
-    shared_libs: [
-        "android.hardware.confirmationui@1.0",
-        "android.hardware.keymaster@4.0",
-        "libbase",
-        "libfsldisplay",
-        "libhidlbase",
-        "libteeui_hal_support",
-        "libtrusty",
-        "libutils",
-    ],
+    arch: {
+        arm64: {
+            shared_libs: [
+                "android.hardware.confirmationui@1.0",
+                "android.hardware.keymaster@4.0",
+                "libbase",
+                "libfsldisplay",
+                "libhidlbase",
+                "libteeui_hal_support",
+                "libtrusty",
+                "libutils",
+            ],
 
-    export_include_dirs: ["include"],
+            export_include_dirs: ["include"],
 
-    include_dirs: [
-        "vendor/nxp-opensource/imx/display/display",
-    ],
+            include_dirs: [
+                "vendor/nxp-opensource/imx/display/display",
+            ],
 
-    srcs: [
-        "TrustyApp.cpp",
-        "TrustyConfirmationUI.cpp",
-    ],
+            srcs: [
+                "TrustyApp.cpp",
+                "TrustyConfirmationUI.cpp",
+            ],
 
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-DTEEUI_USE_STD_VECTOR",
-    ],
+            cflags: [
+                "-Wall",
+                "-Werror",
+                "-DTEEUI_USE_STD_VECTOR",
+            ],
+        },
+    },
 }
 
 cc_library {
