@@ -18,23 +18,27 @@ cc_binary {
     name: "trusty_apploader",
     vendor: true,
 
-    srcs: [
-        "apploader.cpp",
-    ],
+    arch: {
+        arm64: {
+            srcs: [
+                "apploader.cpp",
+            ],
 
-    shared_libs: [
-        "libutils",
-        "libbase",
-        "libc",
-        "libfsldisplay",
-        "liblog",
-        "libtrusty",
-    ],
-    include_dirs: [
-        "vendor/nxp-opensource/imx/display/display",
-    ],
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
+            shared_libs: [
+                "libutils",
+                "libbase",
+                "libc",
+                "libfsldisplay",
+                "liblog",
+                "libtrusty",
+            ],
+            include_dirs: [
+                "vendor/nxp-opensource/imx/display/display",
+            ],
+            cflags: [
+                "-Wall",
+                "-Werror",
+            ],
+        },
+    },
 }
