@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <string>
 
-#include "IonAllocator.h"
+#include "Allocator.h"
 
 #include "apploader_ipc.h"
 
@@ -120,9 +120,9 @@ static unique_fd read_file(const char* file_name, off64_t* out_file_size) {
         return {};
     }
 
-    fsl::IonAllocator * pIonAllocator = fsl::IonAllocator::getInstance();
+    fsl::Allocator * pAllocator = fsl::Allocator::getInstance();
 
-    unique_fd dmabuf_fd = unique_fd(pIonAllocator->allocMemory(file_page_size, ION_MEM_ALIGN, fsl::MFLAGS_CONTIGUOUS));
+    unique_fd dmabuf_fd = unique_fd(pAllocator->allocMemory(file_page_size, MEM_ALIGN, fsl::MFLAGS_CONTIGUOUS));
 
     void* shm = mmap(0, file_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, dmabuf_fd, 0);
     if (shm == MAP_FAILED) {
