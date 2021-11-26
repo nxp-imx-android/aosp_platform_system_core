@@ -101,7 +101,7 @@ TrustyApp::TrustyApp(const std::string& path, const std::string& appname)
 
     uint32_t shm_len = RoundPageUp(CONFIRMATIONUI_MAX_MSG_SIZE);
     fsl::Allocator * pAllocator = fsl::Allocator::getInstance();
-    unique_fd dma_buf = unique_fd(pAllocator->allocMemory(shm_len, MEM_ALIGN, fsl::MFLAGS_CONTIGUOUS));
+    unique_fd dma_buf = unique_fd(pAllocator->allocMemory(shm_len, MEM_ALIGN, fsl::MFLAGS_CONTIGUOUS | fsl::MFLAGS_CACHEABLE));
     if (dma_buf < 0) {
         LOG(ERROR) << AT << "failed to allocate shared memory buffer";
         return;
